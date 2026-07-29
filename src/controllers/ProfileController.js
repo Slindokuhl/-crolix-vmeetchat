@@ -261,6 +261,7 @@ export class ProfileController {
         this._fullUserData = { ...doc.data(), userId: doc.id };
         this._user.name = this._fullUserData.name;
         this._user.profilePicBase64 = this._fullUserData.profilePicBase64;
+        this._user.isPremium = !!this._fullUserData.isPremium;
         localStorage.setItem(SESSION_KEY, JSON.stringify(this._user));
       }
     } catch (err) {
@@ -360,6 +361,24 @@ export class ProfileController {
 
     await this._chatController.joinGroup(result.group.id);
     this._openGroupDirect(result.group.id);
+  }
+
+  async _showUpgradeFlow() {
+    const ok = await crolixConfirm(
+      "Upgrade to Premium ($9.99/mo) for unlimited meeting length — no more time caps. This is a demo upgrade (no real payment yet).",
+      { title: "Upgrade to Premium?", confirmText: "Upgrade", icon: "success" }
+    );
+    if (!ok) return;
+    try {
+      await this._db.collection("users").doc(this._user.userId).update({ isPremium: true });
+      this._user.isPremium = true;
+      if (this._fullUserData) this._fullUserData.isPremium = true;
+      localStorage.setItem(SESSION_KEY, JSON.stringify(this._user));
+      this._showEditModal();
+    } catch (err) {
+      console.error("Upgrade error:", err);
+      crolixAlert("Failed to upgrade. Please try again.", { title: "Error", icon: "error" });
+    }
   }
 
   _bindEvents() {
@@ -488,6 +507,9 @@ export class ProfileController {
 
     const resetVaultBtn = overlay.querySelector("#resetVaultAccessBtn");
     if (resetVaultBtn) resetVaultBtn.onclick = () => this._categoryController.showResetVaultAccessFlow();
+
+    const upgradeBtn = overlay.querySelector("#upgradePremiumBtn");
+    if (upgradeBtn && !this._user.isPremium) upgradeBtn.onclick = () => this._showUpgradeFlow();
 
     const preview = overlay.querySelector("#editAvatarPreview");
     const fileInput = overlay.querySelector("#editAvatarInput");

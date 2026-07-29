@@ -82,3 +82,5 @@
 .meeting-ended-countdown strong{color:var(--accent-light);font-size:18px;}
 .meeting-ended-btn{padding:12px 32px;border-radius:12px;border:none;background:var(--accent);color:#fff;font-family:var(--font);font-size:14px;font-weight:700;cursor:pointer;transition:all 0.2s ease;margin-top:4px;}
 .meeting-ended-btn:hover{background:var(--accent-dark);transform:translateY(-1px);box-shadow:0 4px 16px rgba(99,102,241,0.3);}
+.meeting-ended-btn.meeting-ended-upgrade{background:linear-gradient(135deg,#f59e0b,#fbbf24);color:#1a1200;}
+.meeting-ended-btn.meeting-ended-upgrade:hover{background:linear-gradient(135deg,#d97706,#f59e0b);box-shadow:0 4px 16px rgba(251,191,36,0.35);}

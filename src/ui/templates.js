@@ -179,6 +179,7 @@ export function buildMeetingScreen() {
       <div class="meeting-ended-countdown" id="meetingEndedCountdown" style="display:none;">
         <span>Leaving in </span><strong id="meetingEndedTimer">5</strong><span>s</span>
       </div>
+      <button class="meeting-ended-btn meeting-ended-upgrade" id="meetingEndedUpgrade" style="display:none;">Upgrade to Premium — $9.99/mo</button>
       <button class="meeting-ended-btn" id="meetingEndedLeave">Leave Now</button>
     </div>
   </div>

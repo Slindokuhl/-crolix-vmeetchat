@@ -11,7 +11,9 @@ import { initLogoAbsorption } from "../utils/logoAnimation.js";
 import { ScreenZoomController } from "../utils/screenZoom.js";
 import { GifReactions } from "../utils/gifReactions.js";
 import { SessionController } from "./SessionController.js";
-import { crolixAlert } from "../utils/confirmModal.js";
+import { crolixAlert, crolixConfirm } from "../utils/confirmModal.js";
+
+const FREE_MEETING_CAP_MINUTES = 40;
 
 export class VideoCall {
   constructor(containerId) {
@@ -34,6 +36,7 @@ export class VideoCall {
     this._meetChatMsgUnsub = null; this._meetChatTypingUnsub = null;
     this._meetChatGuestUnsub = null; this._meetChatTargetUid = null; this._meetChatTypingTimer = null;
     this._meetingStatusUnsub = null; this._meetingEndTimeout = null; this._hostTimerMins = 5;
+    this._endedByFreeCap = false; this._freeCapWarningTimeout = null;
     this._initFirebase(); this._buildUI(); this._bindEvents(); this._loadEmailJS();
     this._logoAnimCleanup = initLogoAbsorption(this.container);
     this._screenZoom = new ScreenZoomController(this.container);
@@ -593,7 +596,7 @@ export class VideoCall {
       this.joined = true; this.joining = false; this.startTimer(); this._updateCountDisplay();
       this._presenceWritten = false;
       this._gifReactions.start();
-      if (this._isHost()) { this._setMeetingStatus("active"); }
+      if (this._isHost()) { this._setMeetingStatus("active"); this._applyFreeMeetingCapIfNeeded(); }
       this._listenMeetingStatus();
       this._sessionController.init(channel, String(joinedUid), this._isHost(), this._gifReactions);
       this._showMusicBtn();
@@ -618,11 +621,13 @@ export class VideoCall {
     const screenTrack = this.screenTrack, localTracks = this.localTracks.slice();
     const client = this.client, unsubscribe = this._unsubscribe;
     this.joined = false; this.joining = false; this.audioMuted = true; this.videoMuted = true; this.screenSharing = false;
+    this._endedByFreeCap = false;
     this._sessionController.destroy();
     const musicBtn = this.container.querySelector("#musicMuteBtn"); if (musicBtn) musicBtn.style.display = "none";
     this._meetChatCleanup();
     if (this._meetingStatusUnsub) { this._meetingStatusUnsub(); this._meetingStatusUnsub = null; }
     if (this._meetingEndTimeout) { clearTimeout(this._meetingEndTimeout); this._meetingEndTimeout = null; }
+    if (this._freeCapWarningTimeout) { clearTimeout(this._freeCapWarningTimeout); this._freeCapWarningTimeout = null; }
     const meetChatPanel = this.container.querySelector("#meet-chat-panel"); if (meetChatPanel) meetChatPanel.style.display = "none";
     const meetEndedOverlay = this.container.querySelector("#meetingEndedOverlay"); if (meetEndedOverlay) meetEndedOverlay.style.display = "none";
     const hostOverlay = this.container.querySelector("#hostLeaveOverlay"); if (hostOverlay) hostOverlay.style.display = "none";
@@ -780,6 +785,20 @@ export class VideoCall {
     this.container.querySelector("#meetingEndedTitle").textContent = title;
     this.container.querySelector("#meetingEndedMsg").textContent = msg;
     const countdownEl = this.container.querySelector("#meetingEndedCountdown");
+    const upgradeBtn = this.container.querySelector("#meetingEndedUpgrade");
+
+    if (this._endedByFreeCap) {
+      // Free-tier cap: no forced auto-leave countdown — give the host a moment to consider upgrading.
+      if (countdownEl) countdownEl.style.display = "none";
+      if (upgradeBtn) {
+        upgradeBtn.style.display = "";
+        upgradeBtn.onclick = () => this._showUpgradeFlow();
+      }
+      this.container.querySelector("#meetingEndedLeave").onclick = () => this._forceLeaveMeeting();
+      return;
+    }
+
+    if (upgradeBtn) upgradeBtn.style.display = "none";
     if (countdownEl) countdownEl.style.display = "";
     let secs = 5;
     const timerEl = this.container.querySelector("#meetingEndedTimer");
@@ -796,15 +815,17 @@ export class VideoCall {
     };
   }
 
-  _showMeetingEndingTimer(remainingMs) {
+  _showMeetingEndingTimer(remainingMs, title = "Host has left", msg = null) {
     const overlay = this.container.querySelector("#meetingEndedOverlay");
     if (!overlay || overlay.style.display !== "none") return;
     const mins = Math.ceil(remainingMs / 60000);
     overlay.style.display = "flex";
-    this.container.querySelector("#meetingEndedTitle").textContent = "Host has left";
-    this.container.querySelector("#meetingEndedMsg").textContent = `Meeting will end in ~${mins} minute${mins !== 1 ? "s" : ""}`;
+    this.container.querySelector("#meetingEndedTitle").textContent = title;
+    this.container.querySelector("#meetingEndedMsg").textContent = msg || `Meeting will end in ~${mins} minute${mins !== 1 ? "s" : ""}`;
     const countdownEl = this.container.querySelector("#meetingEndedCountdown");
     if (countdownEl) countdownEl.style.display = "none";
+    const upgradeBtn = this.container.querySelector("#meetingEndedUpgrade");
+    if (upgradeBtn) upgradeBtn.style.display = "none";
     this.container.querySelector("#meetingEndedLeave").textContent = "OK";
     this.container.querySelector("#meetingEndedLeave").onclick = () => {
       overlay.style.display = "none";
@@ -812,8 +833,73 @@ export class VideoCall {
 
     // Set actual timeout to end
     this._meetingEndTimeout = setTimeout(() => {
-      this._showMeetingEnded("Meeting has ended", "The host's timer has expired.");
+      if (this._endedByFreeCap) {
+        this._showMeetingEnded(
+          "Your free meeting has ended",
+          `Free meetings are capped at ${FREE_MEETING_CAP_MINUTES} minutes. Upgrade to Premium ($9.99/mo) for unlimited meeting time.`
+        );
+      } else {
+        this._showMeetingEnded("Meeting has ended", "The host's timer has expired.");
+      }
     }, remainingMs);
+  }
+
+  // ── Free-tier meeting length cap ─────────────────────────────
+
+  async _applyFreeMeetingCapIfNeeded() {
+    try {
+      const session = JSON.parse(localStorage.getItem("crolixUser"));
+      if (!session?.userId || !this._db) return;
+      const doc = await this._db.collection("users").doc(session.userId).get();
+      const isPremium = doc.exists && !!doc.data().isPremium;
+      if (isPremium) return;
+
+      this._endedByFreeCap = true;
+      const endsAt = Date.now() + FREE_MEETING_CAP_MINUTES * 60000;
+      await this._setMeetingStatus("ending", endsAt);
+      this._scheduleFreeCapWarning(endsAt);
+      this._showMeetingEndingTimer(
+        endsAt - Date.now(),
+        "Free plan",
+        `This meeting will end after ${FREE_MEETING_CAP_MINUTES} minutes on the free plan. Upgrade to Premium ($9.99/mo) for unlimited meetings.`
+      );
+    } catch (err) {
+      console.error("Free meeting cap check failed:", err);
+    }
+  }
+
+  _scheduleFreeCapWarning(endsAt) {
+    const WARNING_LEAD_MS = 5 * 60000;
+    const msUntilWarning = (endsAt - WARNING_LEAD_MS) - Date.now();
+    if (msUntilWarning <= 0) return; // meeting too short to fit a separate 5-minute warning
+
+    if (this._freeCapWarningTimeout) clearTimeout(this._freeCapWarningTimeout);
+    this._freeCapWarningTimeout = setTimeout(() => {
+      if (!this.joined || !this._endedByFreeCap) return;
+      crolixAlert(
+        "Your free meeting will end in 5 minutes. Upgrade to Premium ($9.99/mo) for unlimited meeting time.",
+        { title: "5 minutes left", icon: "warning" }
+      );
+    }, msUntilWarning);
+  }
+
+  async _showUpgradeFlow() {
+    const session = JSON.parse(localStorage.getItem("crolixUser") || "null");
+    if (!session?.userId || !this._db) return;
+
+    const ok = await crolixConfirm(
+      "Upgrade to Premium ($9.99/mo) for unlimited meeting length — no more time caps. This is a demo upgrade (no real payment yet).",
+      { title: "Upgrade to Premium?", confirmText: "Upgrade", icon: "success" }
+    );
+    if (!ok) return;
+
+    try {
+      await this._db.collection("users").doc(session.userId).update({ isPremium: true });
+      this._forceLeaveMeeting();
+    } catch (err) {
+      console.error("Upgrade error:", err);
+      crolixAlert("Failed to upgrade. Please try again.", { title: "Error", icon: "error" });
+    }
   }
 
   _forceLeaveMeeting() {

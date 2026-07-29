@@ -1,6 +1,6 @@
 /**
  * src/ui/categoryTemplates.js
- * HTML templates for Contact Categories — premium friend-grouping cards, create/rename/password modals, member panel.
+ * HTML templates for Contact Categories — friend-grouping cards, create/rename/password modals, member panel.
  */
 
 const CATEGORY_COLORS = [
@@ -20,18 +20,7 @@ function _folderIconSvg(size) {
   return `<svg width="${size}" height="${size}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="vertical-align:-${Math.round(size * 0.17)}px;margin-right:6px;opacity:0.7;"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></svg>`;
 }
 
-export function buildCategoriesPage(categories, isPremium) {
-  if (!isPremium) {
-    return `
-<div class="ppage-header">
-  <div>
-    <h2 class="ppage-title">${_folderIconSvg(18)}Categories</h2>
-    <p class="ppage-subtitle">Organize your friends into custom folders — Family, Work, Girls, whatever you like</p>
-  </div>
-</div>
-${buildUpsellBlock()}`;
-  }
-
+export function buildCategoriesPage(categories) {
   const cardsHtml = categories.map((c, i) => buildCategoryCard(c, i)).join("");
 
   return `
@@ -46,21 +35,6 @@ ${buildUpsellBlock()}`;
 <div class="profile-empty" id="catEmpty" style="${categories.length ? "display:none;" : ""}">
   <div class="profile-empty-icon">${_folderIconSvg(36)}</div>
   No categories yet.<br>Create one to group your friends — Family, Work, Girls, anything you like.
-</div>`;
-}
-
-export function buildUpsellBlock() {
-  return `
-<div class="cat-upsell">
-  <div class="cat-upsell-icon"><svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="#fbbf24" stroke-width="1.8"><path d="M12 2l2.4 7.2H22l-6 4.4 2.3 7.2-6.3-4.5-6.3 4.5 2.3-7.2-6-4.4h7.6z"/></svg></div>
-  <div class="cat-upsell-title">Contact Categories is a Premium feature</div>
-  <div class="cat-upsell-desc">Group your friends into custom, password-protectable folders — Family, Work, Girls, anything you like — and jump straight to chatting or calling them.</div>
-  <ul class="cat-upsell-list">
-    <li>Unlimited custom categories</li>
-    <li>Optional password lock per category</li>
-    <li>Spin up a group chat for a category in one click</li>
-  </ul>
-  <button class="phome-start-btn" id="catUpgradeBtn" style="max-width:260px;">Upgrade to Premium</button>
 </div>`;
 }
 

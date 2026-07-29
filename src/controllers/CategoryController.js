@@ -1,15 +1,15 @@
 /**
  * src/controllers/CategoryController.js
- * Contact Categories — premium feature for grouping friends into named,
- * optionally password-protected folders. Chat/Call actions delegate back
- * to ChatController/ProfileController via constructor callbacks.
+ * Contact Categories — grouping friends into named, optionally
+ * password-protected folders, with a hidden vault for extra-private ones.
+ * Chat/Call actions delegate back to ChatController/ProfileController via
+ * constructor callbacks.
  */
 
 import { FIREBASE_CONFIG, EMAILJS_PUBLIC_KEY, EMAILJS_SERVICE_ID, EMAILJS_TEMPLATE_HOST } from "../config/config.js";
 import { crolixConfirm, crolixAlert } from "../utils/confirmModal.js";
 import {
   buildCategoriesPage,
-  buildUpsellBlock,
   buildCreateCategoryModal,
   buildTextPromptModal,
   buildVaultSetupModal,
@@ -56,8 +56,6 @@ export class CategoryController {
     this._fullUserData = fullUserData;
   }
 
-  get _isPremium() { return !!this._fullUserData?.isPremium; }
-
   // ── Render ───────────────────────────────────────────────
 
   async render() {
@@ -66,15 +64,9 @@ export class CategoryController {
     const inner = page.querySelector(".ppage-inner");
     if (!inner) return;
 
-    if (!this._isPremium) {
-      inner.innerHTML = buildCategoriesPage([], false);
-      this._bindUpsell(inner);
-      return;
-    }
-
     inner.innerHTML = '<div class="profile-loading"><div class="profile-spinner"></div>Loading…</div>';
     await this._loadCategories();
-    inner.innerHTML = buildCategoriesPage(this._categories, true);
+    inner.innerHTML = buildCategoriesPage(this._categories);
     this._bindPageEvents(inner);
   }
 
@@ -89,27 +81,6 @@ export class CategoryController {
       this._allCategories = [];
     }
     this._categories = this._allCategories.filter(c => !c.hidden);
-  }
-
-  _bindUpsell(inner) {
-    const btn = inner.querySelector("#catUpgradeBtn");
-    if (btn) btn.onclick = () => this._showUpgradeFlow();
-  }
-
-  async _showUpgradeFlow() {
-    const ok = await crolixConfirm(
-      "Unlock Contact Categories — organize friends into folders like Family, Work, or Girls, with optional password protection. This is a demo upgrade (no real payment yet).",
-      { title: "Upgrade to Premium?", confirmText: "Upgrade", icon: "success" }
-    );
-    if (!ok) return;
-    try {
-      await this._db.collection("users").doc(this._user.userId).update({ isPremium: true });
-      this._fullUserData.isPremium = true;
-      this.render();
-    } catch (err) {
-      console.error("Upgrade error:", err);
-      crolixAlert("Failed to upgrade. Please try again.", { title: "Error", icon: "error" });
-    }
   }
 
   _bindPageEvents(inner) {

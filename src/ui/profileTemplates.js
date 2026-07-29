@@ -472,6 +472,9 @@ export function buildEditProfileModal(user) {
       <button class="auth-submit" id="editSaveBtn" style="flex:1;">Save Changes</button>
       <button class="auth-submit" id="editCancelBtn" style="flex:1;background:var(--bg-card);color:var(--text-soft);border:1px solid var(--border-soft);">Cancel</button>
     </div>
+    ${user.isPremium
+      ? `<button class="auth-submit" id="upgradePremiumBtn" type="button" disabled style="margin-top:12px;width:100%;background:rgba(251,191,36,0.12);color:#fbbf24;border:1px solid rgba(251,191,36,0.35);cursor:default;">✓ Premium Account — Unlimited Meetings</button>`
+      : `<button class="auth-submit" id="upgradePremiumBtn" type="button" style="margin-top:12px;width:100%;background:linear-gradient(135deg,#f59e0b,#fbbf24);color:#1a1200;">Upgrade to Premium — $9.99/mo</button>`}
     <button class="bio-edit-btn" id="resetVaultAccessBtn" type="button" style="margin-top:12px;width:100%;">Reset Hidden Vault Access</button>
   </div>
 </div>`;
