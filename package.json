@@ -1,0 +1,12 @@
+{
+  "name": "crolix-vmeetchat",
+  "version": "1.0.0",
+  "description": "CrolixMeet — Instant, high-quality video meetings.",
+  "author": "Slindokuhle Atlehang Ngidi",
+  "license": "MIT",
+  "private": true,
+  "scripts": {
+    "dev": "npx serve . --listen 3000"
+  },
+  "devDependencies": {}
+}

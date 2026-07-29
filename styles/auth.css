@@ -1,0 +1,96 @@
+/* styles/auth.css — Sign up, Login, OTP screens */
+
+/* ── Auth wrapper ── */
+.auth-screen{position:fixed;inset:0;background:var(--bg-deep);z-index:100000;display:flex;align-items:center;justify-content:center;font-family:var(--font);overflow-y:auto;padding:24px;}
+
+/* ── Choice screen ── */
+.auth-choice{display:flex;flex-direction:column;align-items:center;gap:32px;max-width:420px;width:100%;animation:authFadeIn 0.5s ease both;}
+.auth-choice-logo{display:flex;flex-direction:column;align-items:center;gap:10px;}
+.auth-choice-logo svg{width:64px;height:64px;}
+.auth-choice-brand{font-size:22px;font-weight:700;color:var(--text-primary);letter-spacing:-0.02em;}
+.auth-choice-brand .meet{color:var(--accent-light);font-weight:500;}
+.auth-choice-sub{font-size:14px;color:var(--text-muted);text-align:center;line-height:1.5;}
+.auth-choice-btns{display:flex;flex-direction:column;gap:12px;width:100%;}
+.auth-choice-btn{width:100%;padding:14px 20px;border-radius:var(--radius-md);border:1px solid var(--border-soft);font-family:var(--font);font-size:14px;font-weight:600;cursor:pointer;transition:all 0.2s ease;display:flex;align-items:center;justify-content:center;gap:10px;}
+.auth-choice-btn.primary{background:var(--accent);color:#fff;border-color:var(--accent);}
+.auth-choice-btn.primary:hover{background:var(--accent-dark);transform:translateY(-1px);box-shadow:0 4px 20px rgba(99,102,241,0.3);}
+.auth-choice-btn.secondary{background:var(--bg-card);color:var(--text-soft);border-color:var(--border-soft);}
+.auth-choice-btn.secondary:hover{background:var(--bg-hover);border-color:var(--accent-light);transform:translateY(-1px);}
+.auth-choice-divider{display:flex;align-items:center;gap:12px;width:100%;color:var(--text-dim);font-size:12px;letter-spacing:0.05em;}
+.auth-choice-divider::before,.auth-choice-divider::after{content:"";flex:1;height:1px;background:var(--border-muted);}
+
+/* ── Auth card (shared by sign up and login) ── */
+.auth-card{width:100%;max-width:440px;background:var(--bg-panel);border:1px solid var(--border-muted);border-radius:var(--radius-xl);padding:36px 32px;animation:authSlideUp 0.45s cubic-bezier(0.34,1.1,0.64,1) both;}
+@keyframes authSlideUp{from{opacity:0;transform:translateY(20px);}to{opacity:1;transform:translateY(0);}}
+@keyframes authFadeIn{from{opacity:0;}to{opacity:1;}}
+
+.auth-card-header{text-align:center;margin-bottom:28px;}
+.auth-card-header h2{font-size:20px;font-weight:700;color:var(--text-primary);margin-bottom:6px;}
+.auth-card-header p{font-size:13px;color:var(--text-muted);line-height:1.5;}
+
+.auth-back-btn{background:none;border:none;color:var(--text-muted);font-family:var(--font);font-size:13px;cursor:pointer;display:flex;align-items:center;gap:6px;margin-bottom:16px;padding:0;transition:color 0.2s ease;}
+.auth-back-btn:hover{color:var(--accent-light);}
+
+/* ── Form fields ── */
+.auth-field{display:flex;flex-direction:column;gap:6px;margin-bottom:18px;}
+.auth-field label{font-size:11px;font-weight:600;color:var(--text-muted);letter-spacing:0.08em;text-transform:uppercase;}
+.auth-field input,.auth-field textarea{width:100%;padding:12px 14px;border-radius:var(--radius-sm);border:1px solid var(--border-soft);background:var(--bg-card);color:var(--text-primary);font-family:var(--font);font-size:14px;transition:border-color 0.2s ease,box-shadow 0.2s ease;outline:none;box-sizing:border-box;}
+.auth-field input:focus,.auth-field textarea:focus{border-color:var(--accent);box-shadow:0 0 0 3px rgba(99,102,241,0.15);}
+.auth-field input::placeholder{color:var(--text-dim);}
+.auth-field .field-hint{font-size:11px;color:var(--text-dim);margin-top:2px;}
+.auth-field .field-error{font-size:11px;color:#f87171;margin-top:2px;display:none;}
+.auth-field.has-error input{border-color:#ef4444;}
+.auth-field.has-error .field-error{display:block;}
+.auth-field.has-error .field-hint{display:none;}
+
+/* ── Meeting ID field with availability check ── */
+.auth-meetid-wrap{position:relative;}
+.auth-meetid-wrap input{padding-right:40px;}
+.auth-meetid-status{position:absolute;right:12px;top:50%;transform:translateY(-50%);font-size:16px;line-height:1;}
+.auth-meetid-status.checking{color:var(--text-dim);animation:spin 1s linear infinite;}
+.auth-meetid-status.available{color:#4ade80;}
+.auth-meetid-status.taken{color:#f87171;}
+@keyframes spin{from{transform:translateY(-50%) rotate(0deg);}to{transform:translateY(-50%) rotate(360deg);}}
+
+/* ── Profile picture upload ── */
+.auth-avatar-upload{display:flex;flex-direction:column;align-items:center;gap:12px;margin-bottom:24px;}
+.auth-avatar-preview{width:96px;height:96px;border-radius:50%;background:var(--bg-card);border:3px dashed var(--border-soft);display:flex;align-items:center;justify-content:center;cursor:pointer;overflow:hidden;transition:border-color 0.2s ease,transform 0.15s ease;position:relative;}
+.auth-avatar-preview:hover{border-color:var(--accent-light);transform:scale(1.04);}
+.auth-avatar-preview.has-image{border-style:solid;border-color:var(--accent);}
+.auth-avatar-preview img{width:100%;height:100%;object-fit:cover;border-radius:50%;}
+.auth-avatar-preview .avatar-placeholder{display:flex;flex-direction:column;align-items:center;gap:4px;color:var(--text-dim);font-size:11px;font-weight:500;}
+.auth-avatar-preview .avatar-placeholder svg{stroke:var(--text-dim);width:28px;height:28px;}
+.auth-avatar-input{display:none;}
+.auth-avatar-label{font-size:12px;color:var(--accent-light);cursor:pointer;font-weight:500;transition:color 0.2s ease;}
+.auth-avatar-label:hover{color:var(--accent);}
+
+/* ── Submit button ── */
+.auth-submit{width:100%;padding:14px;border-radius:var(--radius-md);border:none;background:var(--accent);color:#fff;font-family:var(--font);font-size:14px;font-weight:600;cursor:pointer;transition:all 0.2s ease;margin-top:8px;letter-spacing:0.02em;}
+.auth-submit:hover:not(:disabled){background:var(--accent-dark);transform:translateY(-1px);box-shadow:0 4px 20px rgba(99,102,241,0.3);}
+.auth-submit:disabled{opacity:0.5;cursor:not-allowed;transform:none;}
+
+/* ── Auth error banner ── */
+.auth-error{background:rgba(239,68,68,0.1);border:1px solid rgba(239,68,68,0.3);border-radius:var(--radius-sm);padding:10px 14px;font-size:12px;color:#fca5a5;margin-bottom:16px;display:none;animation:authFadeIn 0.3s ease;}
+.auth-error.visible{display:block;}
+
+/* ── OTP input ── */
+.otp-inputs{display:flex;gap:8px;justify-content:center;margin:24px 0;}
+.otp-inputs input{width:48px;height:56px;text-align:center;font-size:22px;font-weight:700;font-family:var(--font);border-radius:var(--radius-sm);border:1px solid var(--border-soft);background:var(--bg-card);color:var(--text-primary);outline:none;transition:border-color 0.2s ease,box-shadow 0.2s ease;}
+.otp-inputs input:focus{border-color:var(--accent);box-shadow:0 0 0 3px rgba(99,102,241,0.15);}
+.otp-resend{font-size:12px;color:var(--text-muted);text-align:center;margin-top:12px;}
+.otp-resend button{background:none;border:none;color:var(--accent-light);font-family:var(--font);font-size:12px;font-weight:600;cursor:pointer;padding:0;}
+.otp-resend button:hover{text-decoration:underline;}
+.otp-resend button:disabled{color:var(--text-dim);cursor:not-allowed;text-decoration:none;}
+
+/* ── Switch link (already have account / create one) ── */
+.auth-switch{text-align:center;margin-top:20px;font-size:13px;color:var(--text-muted);}
+.auth-switch button{background:none;border:none;color:var(--accent-light);font-family:var(--font);font-size:13px;font-weight:600;cursor:pointer;padding:0;}
+.auth-switch button:hover{text-decoration:underline;}
+
+/* ── Mobile responsive ── */
+@media(max-width:500px){
+  .auth-screen{padding:16px;}
+  .auth-card{padding:28px 20px;border-radius:var(--radius-lg);}
+  .otp-inputs input{width:42px;height:50px;font-size:20px;}
+  .auth-avatar-preview{width:80px;height:80px;}
+}

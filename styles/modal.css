@@ -1,0 +1,44 @@
+/* styles/modal.css — Schedule modal and success toast */
+.sched-overlay{position:fixed;inset:0;background:rgba(2,6,23,0.82);backdrop-filter:blur(6px);z-index:100000;display:flex;align-items:center;justify-content:center;padding:1rem;opacity:0;transition:opacity 0.3s ease;}
+.sched-overlay.open{opacity:1;}
+.sched-modal{width:100%;max-width:520px;background:var(--bg-panel);border:1px solid rgba(99,102,241,0.25);border-radius:var(--radius-xl);box-shadow:0 24px 60px rgba(0,0,0,0.7),0 0 0 1px rgba(255,255,255,0.04);overflow:hidden;transform:translateY(24px) scale(0.97);opacity:0;transition:transform 0.3s cubic-bezier(0.34,1.2,0.64,1),opacity 0.3s ease;}
+.sched-overlay.open .sched-modal{transform:translateY(0) scale(1);opacity:1;}
+.sched-header{display:flex;align-items:center;justify-content:space-between;padding:18px 22px;background:linear-gradient(135deg,rgba(79,70,229,0.2),rgba(168,85,247,0.15));border-bottom:1px solid var(--border-muted);}
+.sched-header-left{display:flex;align-items:center;gap:10px;font-size:15px;font-weight:600;color:#e0e7ff;font-family:var(--font);}
+.sched-header-left svg{stroke:var(--accent-light);}
+.sched-close{background:rgba(255,255,255,0.07);border:1px solid var(--border-soft);color:var(--text-muted);width:30px;height:30px;border-radius:var(--radius-sm);cursor:pointer;font-size:13px;display:flex;align-items:center;justify-content:center;transition:background var(--transition),color var(--transition);font-family:var(--font);flex-shrink:0;}
+.sched-close:hover{background:rgba(239,68,68,0.2);color:var(--red-text);}
+.sched-body{padding:22px;display:flex;flex-direction:column;gap:16px;}
+.sched-row{display:grid;grid-template-columns:1fr 1fr;gap:14px;}
+.sched-field{display:flex;flex-direction:column;gap:6px;}
+.sched-field label{font-size:11px;font-weight:600;color:var(--text-dim);letter-spacing:0.06em;font-family:var(--font);text-transform:uppercase;}
+.req{color:#f87171;}
+.optional{font-size:10px;color:#475569;text-transform:none;letter-spacing:0;font-weight:400;}
+.sched-field input,.sched-field textarea{background:var(--bg-card);border:1px solid var(--border-muted);border-radius:10px;padding:11px 13px;color:var(--text-primary);font-size:14px;font-family:var(--font);outline:none;width:100%;transition:border-color var(--transition),box-shadow var(--transition);resize:none;}
+.sched-field input:focus,.sched-field textarea:focus{border-color:rgba(99,102,241,0.6);box-shadow:0 0 0 3px rgba(99,102,241,0.12);}
+.sched-field input[type="date"],.sched-field input[type="time"]{color-scheme:dark;}
+.sched-copy-wrap{position:relative;display:flex;align-items:center;}
+.sched-copy-wrap input{padding-right:42px;}
+.sched-copy-btn{position:absolute;right:8px;background:rgba(99,102,241,0.15);border:1px solid rgba(99,102,241,0.3);border-radius:7px;color:var(--accent-light);width:28px;height:28px;display:flex;align-items:center;justify-content:center;cursor:pointer;transition:background var(--transition),transform 0.15s;flex-shrink:0;}
+.sched-copy-btn:hover{background:rgba(99,102,241,0.28);transform:scale(1.05);}
+.sched-copy-btn.copied{background:rgba(34,197,94,0.2);border-color:rgba(34,197,94,0.4);color:#86efac;}
+/* Lookup button & result */
+.sched-lookup-btn{position:absolute;right:6px;padding:6px 14px;border-radius:8px;border:none;background:var(--accent);color:#fff;font-family:var(--font);font-size:11px;font-weight:700;cursor:pointer;transition:all 0.2s ease;letter-spacing:0.02em;}
+.sched-lookup-btn:hover{background:var(--accent-dark);}
+.sched-lookup-result{margin-top:6px;}
+.sched-user-found{display:flex;align-items:center;gap:10px;padding:10px 14px;background:rgba(34,197,94,0.06);border:1px solid rgba(34,197,94,0.25);border-radius:10px;font-family:var(--font);font-size:13px;color:var(--text-soft);}
+.sched-user-found strong{color:var(--text-primary);font-weight:600;}
+.sched-found-check{margin-left:auto;color:#4ade80;font-size:18px;font-weight:700;}
+
+.sched-err{color:#f87171;font-size:13px;font-family:var(--font);background:rgba(239,68,68,0.08);border:1px solid rgba(239,68,68,0.2);border-radius:var(--radius-sm);padding:8px 12px;}
+.sched-submit{display:flex;align-items:center;justify-content:center;gap:9px;padding:14px;background:linear-gradient(135deg,var(--accent-dark),var(--purple));border:none;border-radius:var(--radius-md);color:white;font-weight:600;font-size:15px;font-family:var(--font);cursor:pointer;transition:opacity var(--transition),transform 0.15s,box-shadow var(--transition);box-shadow:0 4px 20px rgba(79,70,229,0.35);width:100%;margin-top:4px;}
+.sched-submit:hover:not(:disabled){opacity:0.92;transform:translateY(-1px);box-shadow:0 6px 28px rgba(79,70,229,0.45);}
+.sched-submit:disabled{opacity:0.55;cursor:not-allowed;}
+.sched-submit svg{stroke:white;flex-shrink:0;}
+#sched-success-toast{position:fixed;bottom:36px;left:50%;transform:translateX(-50%) translateY(20px);z-index:200000;pointer-events:none;opacity:0;transition:opacity 0.4s ease,transform 0.4s cubic-bezier(0.34,1.2,0.64,1);}
+#sched-success-toast.show{opacity:1;transform:translateX(-50%) translateY(0);}
+.sched-toast-inner{display:flex;align-items:center;gap:14px;background:var(--bg-panel);border:1px solid rgba(34,197,94,0.35);border-radius:var(--radius-lg);padding:14px 22px;box-shadow:0 8px 32px rgba(0,0,0,0.55),0 0 0 1px rgba(34,197,94,0.1);backdrop-filter:blur(12px);white-space:nowrap;}
+.sched-toast-icon{width:42px;height:42px;border-radius:50%;background:linear-gradient(135deg,rgba(34,197,94,0.25),rgba(16,185,129,0.15));border:1px solid rgba(34,197,94,0.35);display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+.sched-toast-icon svg{stroke:#4ade80;}
+.sched-toast-title{font-size:15px;font-weight:700;color:#f0fdf4;font-family:var(--font);}
+.sched-toast-sub{font-size:13px;color:#86efac;font-family:var(--font);margin-top:2px;}

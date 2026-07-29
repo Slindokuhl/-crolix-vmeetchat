@@ -1,0 +1,104 @@
+# ─────────────────────────────────────────────────────────────
+# .github/workflows/ci.yml
+# CrolixMeet — CI pipeline
+#
+# Runs on every push and pull request to main and develop.
+# Checks: file structure integrity + basic lint.
+# No build step needed — vanilla JS with no bundler.
+# ─────────────────────────────────────────────────────────────
+
+name: CI
+
+on:
+  push:
+    branches: [main, develop]
+  pull_request:
+    branches: [main, develop]
+
+jobs:
+  check:
+    name: Validate project structure
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Check required files exist
+        run: |
+          echo "Checking required files..."
+
+          files=(
+            "index.html"
+            "main.js"
+            "src/config/config.js"
+            "src/controllers/VideoCall.js"
+            "src/ui/icons.js"
+            "src/ui/templates.js"
+            "src/utils/avatar.js"
+            "src/utils/logoAnimation.js"
+            "src/utils/screenZoom.js"
+            "styles/base.css"
+            "styles/join.css"
+            "styles/meeting.css"
+            "styles/modal.css"
+            "styles/participants.css"
+            "styles/zoom.css"
+            "styles/responsive.css"
+            ".env.example"
+            ".gitignore"
+            "README.md"
+          )
+
+          all_ok=true
+          for file in "${files[@]}"; do
+            if [ -f "$file" ]; then
+              echo "  ✅ $file"
+            else
+              echo "  ❌ MISSING: $file"
+              all_ok=false
+            fi
+          done
+
+          if [ "$all_ok" = false ]; then
+            echo ""
+            echo "One or more required files are missing. Please check the project structure."
+            exit 1
+          fi
+
+          echo ""
+          echo "All required files present ✅"
+
+      - name: Check .env is not committed
+        run: |
+          if [ -f ".env" ]; then
+            echo "❌ ERROR: .env file is committed to the repo!"
+            echo "Remove it with: git rm --cached .env"
+            exit 1
+          else
+            echo "✅ .env not committed — good"
+          fi
+
+      - name: Check .env.example exists and has content
+        run: |
+          if [ ! -s ".env.example" ]; then
+            echo "❌ .env.example is missing or empty"
+            exit 1
+          else
+            echo "✅ .env.example exists"
+          fi
+
+      - name: Check no console.log left in production code (warn only)
+        run: |
+          echo "Checking for leftover console.log statements..."
+          count=$(grep -r "console\.log" src/ --include="*.js" | wc -l)
+          if [ "$count" -gt 0 ]; then
+            echo "⚠️  Warning: $count console.log statement(s) found in src/"
+            grep -r "console\.log" src/ --include="*.js" -n
+          else
+            echo "✅ No console.log found in src/"
+          fi
+          # Warn only — don't fail the build
+
+      - name: Done
+        run: echo "✅ CI checks passed"

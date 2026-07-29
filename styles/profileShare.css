@@ -1,0 +1,666 @@
+/* styles/profileShare.css — Live profile tagging & sharing */
+
+/* ── Tag search panel ─────────────────────────────────────── */
+
+.ps-tag-panel {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+  background: var(--bg-panel);
+  border: 1px solid var(--border-muted);
+  border-bottom: none;
+  border-radius: var(--radius-lg) var(--radius-lg) 0 0;
+  overflow: hidden;
+  transform: translateY(12px);
+  opacity: 0;
+  transition: transform 0.28s cubic-bezier(0.34,1.2,0.64,1), opacity 0.22s ease;
+  pointer-events: none;
+}
+
+.ps-tag-panel.ps-tag-panel-open {
+  transform: translateY(0);
+  opacity: 1;
+  pointer-events: all;
+}
+
+.ps-tag-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 14px;
+  border-bottom: 1px solid var(--border-muted);
+  color: var(--text-dim);
+}
+
+.ps-tag-search {
+  flex: 1;
+  background: none;
+  border: none;
+  outline: none;
+  font-family: var(--font);
+  font-size: 13px;
+  color: var(--text-primary);
+}
+.ps-tag-search::placeholder { color: var(--text-dim); }
+
+.ps-tag-close {
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: var(--text-dim);
+  display: flex;
+  align-items: center;
+  padding: 2px;
+  border-radius: 4px;
+  transition: color 0.15s ease;
+}
+.ps-tag-close:hover { color: var(--text-primary); }
+
+.ps-tag-results {
+  display: flex;
+  flex-direction: column;
+  max-height: 220px;
+  overflow-y: auto;
+}
+.ps-tag-results::-webkit-scrollbar { width: 3px; }
+.ps-tag-results::-webkit-scrollbar-thumb { background: var(--border-soft); border-radius: 3px; }
+
+.ps-tag-result {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 9px 14px;
+  cursor: default;
+  transition: background 0.15s ease;
+}
+.ps-tag-result:hover { background: var(--bg-hover); }
+
+.ps-tag-result-pic { flex-shrink: 0; }
+
+.ps-tag-result-info { flex: 1; min-width: 0; }
+
+.ps-tag-result-name {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text-primary);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.ps-tag-result-id {
+  font-size: 11px;
+  color: var(--text-dim);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.ps-tag-btn {
+  flex-shrink: 0;
+  padding: 5px 14px;
+  border-radius: 14px;
+  border: 1px solid var(--accent);
+  background: rgba(99,102,241,0.10);
+  color: var(--accent-light);
+  font-family: var(--font);
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+.ps-tag-btn:hover { background: var(--accent); color: #fff; }
+
+.ps-tag-empty {
+  padding: 20px 14px;
+  font-size: 12px;
+  color: var(--text-dim);
+  text-align: center;
+}
+
+/* ── Shared profile card area ─────────────────────────────── */
+
+.ps-share-area {
+  flex-shrink: 0;
+  padding: 0 12px 8px;
+  animation: psCardIn 0.38s cubic-bezier(0.34,1.1,0.64,1) both;
+}
+
+@keyframes psCardIn {
+  from { opacity:0; transform: translateY(16px) scale(0.97); }
+  to   { opacity:1; transform: translateY(0) scale(1); }
+}
+
+.ps-share-card {
+  border: 1.5px solid rgba(239,68,68,0.4);
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+  background: var(--bg-card);
+  box-shadow: 0 0 24px rgba(239,68,68,0.08), 0 4px 16px rgba(0,0,0,0.2);
+  animation: psGlow 2.4s ease-in-out infinite;
+}
+
+@keyframes psGlow {
+  0%, 100% { box-shadow: 0 0 20px rgba(239,68,68,0.08), 0 4px 16px rgba(0,0,0,0.2); }
+  50%       { box-shadow: 0 0 32px rgba(239,68,68,0.18), 0 4px 20px rgba(99,102,241,0.12); }
+}
+
+/* ── LIVE banner ──────────────────────────────────────────── */
+
+.ps-live-banner {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  padding: 7px 12px;
+  background: rgba(239,68,68,0.08);
+  border-bottom: 1px solid rgba(239,68,68,0.18);
+}
+
+.ps-live-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: #ef4444;
+  flex-shrink: 0;
+  animation: livePulse 1.1s ease-in-out infinite;
+}
+
+@keyframes livePulse {
+  0%, 100% { transform: scale(1); opacity: 1; box-shadow: 0 0 0 0 rgba(239,68,68,0.6); }
+  50%       { transform: scale(1.15); opacity: 0.85; box-shadow: 0 0 0 4px rgba(239,68,68,0); }
+}
+
+.ps-live-badge {
+  font-size: 9px;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  color: #ef4444;
+  background: rgba(239,68,68,0.12);
+  border: 1px solid rgba(239,68,68,0.25);
+  padding: 1px 6px;
+  border-radius: 6px;
+  flex-shrink: 0;
+}
+
+.ps-live-label {
+  flex: 1;
+  font-size: 11px;
+  font-weight: 500;
+  color: var(--text-soft);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.ps-close-btn {
+  flex-shrink: 0;
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: var(--text-dim);
+  display: flex;
+  align-items: center;
+  padding: 3px;
+  border-radius: 4px;
+  transition: color 0.15s ease, background 0.15s ease;
+}
+.ps-close-btn:hover { color: #f87171; background: rgba(239,68,68,0.1); }
+
+/* ── Card body ────────────────────────────────────────────── */
+
+.ps-card-body {
+  padding: 12px 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.ps-card-profile-row {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+}
+
+.ps-card-pic { flex-shrink: 0; }
+
+.ps-card-info { flex: 1; min-width: 0; }
+
+.ps-card-name {
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--text-primary);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  margin-bottom: 4px;
+}
+
+.ps-card-meetid-row {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-bottom: 4px;
+}
+
+.ps-meetid-chip {
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--accent-light);
+  background: rgba(99,102,241,0.12);
+  border: 1px solid rgba(99,102,241,0.2);
+  padding: 2px 8px;
+  border-radius: 8px;
+  letter-spacing: 0.04em;
+}
+
+.ps-copy-id-btn {
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: var(--text-dim);
+  display: flex;
+  align-items: center;
+  padding: 2px;
+  border-radius: 4px;
+  transition: color 0.15s ease;
+}
+.ps-copy-id-btn:hover { color: var(--accent-light); }
+
+.ps-card-bio {
+  font-size: 11px;
+  color: var(--text-dim);
+  line-height: 1.45;
+  overflow: hidden;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+}
+
+/* ── Action buttons row ───────────────────────────────────── */
+
+.ps-card-actions {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+
+.ps-action-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 6px 12px;
+  border-radius: 14px;
+  border: 1px solid var(--border-soft);
+  background: var(--bg-card);
+  color: var(--text-soft);
+  font-family: var(--font);
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+.ps-action-btn:hover:not(:disabled) {
+  border-color: var(--accent);
+  color: var(--accent-light);
+  background: rgba(99,102,241,0.08);
+}
+
+.ps-action-disabled {
+  opacity: 0.32;
+  cursor: not-allowed !important;
+  pointer-events: none;
+}
+
+.ps-send-invite-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 6px 14px;
+  border-radius: 14px;
+  border: none;
+  background: linear-gradient(135deg, var(--accent), #7c3aed);
+  color: #fff;
+  font-family: var(--font);
+  font-size: 12px;
+  font-weight: 700;
+  cursor: pointer;
+  box-shadow: 0 3px 14px rgba(99,102,241,0.35);
+  transition: all 0.15s ease;
+  margin-left: auto;
+}
+.ps-send-invite-btn:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 5px 20px rgba(99,102,241,0.45);
+}
+
+/* ── Input lock bar ──────────────────────────────────────── */
+
+.ps-input-lock {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  padding: 8px 14px;
+  font-size: 12px;
+  color: var(--text-dim);
+  font-family: var(--font);
+  background: rgba(99,102,241,0.04);
+  border-top: 1px solid var(--border-muted);
+  font-style: italic;
+}
+
+/* ── Invite dropdown ─────────────────────────────────────── */
+
+.ps-invite-drop {
+  background: var(--bg-panel);
+  border: 1px solid var(--border-muted);
+  border-radius: var(--radius-lg);
+  box-shadow: 0 12px 40px rgba(0,0,0,0.5);
+  padding: 8px;
+  min-width: 260px;
+  animation: psDropIn 0.22s cubic-bezier(0.34,1.2,0.64,1);
+}
+
+@keyframes psDropIn {
+  from { opacity:0; transform: scale(0.94) translateY(6px); }
+  to   { opacity:1; transform: scale(1) translateY(0); }
+}
+
+.ps-invite-drop-title {
+  font-size: 11px;
+  color: var(--text-dim);
+  padding: 4px 8px 8px;
+  border-bottom: 1px solid var(--border-muted);
+  margin-bottom: 4px;
+}
+.ps-invite-drop-title strong { color: var(--text-soft); }
+
+.ps-invite-opt {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  padding: 9px 10px;
+  border: none;
+  background: none;
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  text-align: left;
+  transition: background 0.15s ease;
+}
+.ps-invite-opt:hover { background: var(--bg-hover); }
+
+.ps-invite-opt-icon {
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  background: rgba(99,102,241,0.1);
+  border: 1px solid rgba(99,102,241,0.2);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--accent-light);
+  flex-shrink: 0;
+}
+
+.ps-invite-opt-text {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.ps-invite-opt-name {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text-primary);
+  font-family: var(--font);
+}
+
+.ps-invite-opt-desc {
+  font-size: 11px;
+  color: var(--text-dim);
+  font-family: var(--font);
+}
+
+/* ── Profile share history pill ──────────────────────────── */
+
+.ps-history-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 7px 12px;
+  border-radius: 18px;
+  background: var(--bg-panel);
+  border: 1px solid var(--border-muted);
+  max-width: 100%;
+  cursor: default;
+}
+
+.ps-history-avatar { flex-shrink: 0; }
+
+.ps-history-text {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+  min-width: 0;
+}
+
+.ps-history-label {
+  font-size: 10px;
+  color: var(--text-dim);
+  font-family: var(--font);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+
+.ps-history-name {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--text-soft);
+  font-family: var(--font);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.ps-history-view-btn {
+  flex-shrink: 0;
+  padding: 4px 12px;
+  border-radius: 10px;
+  border: 1px solid rgba(99,102,241,0.3);
+  background: rgba(99,102,241,0.08);
+  color: var(--accent-light);
+  font-family: var(--font);
+  font-size: 11px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+.ps-history-view-btn:hover { background: var(--accent); color: #fff; }
+
+/* ── Mobile adjustments ──────────────────────────────────── */
+
+@media (max-width: 500px) {
+  .ps-invite-drop { min-width: calc(100vw - 32px); }
+  .ps-card-actions { gap: 4px; }
+  .ps-action-btn { padding: 5px 8px; font-size: 11px; }
+  .ps-send-invite-btn { padding: 5px 10px; font-size: 11px; }
+}
+
+/* ══════════════════════════════════════════════════════════
+   LIVE NAVIGATION — expanded views (Room / About)
+══════════════════════════════════════════════════════════ */
+
+/* Card widens when a sub-view is open */
+.ps-card-expanded {
+  border-color: rgba(99, 102, 241, 0.55);
+  box-shadow: 0 0 0 1px rgba(99,102,241,0.25), 0 8px 32px rgba(0,0,0,0.45);
+}
+
+/* View header row: back button + title */
+.ps-view-header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 14px 8px;
+  border-bottom: 1px solid rgba(255,255,255,0.06);
+}
+
+.ps-back-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 5px 11px;
+  border-radius: 20px;
+  border: 1px solid rgba(255,255,255,0.12);
+  background: rgba(255,255,255,0.06);
+  color: rgba(255,255,255,0.7);
+  font-family: var(--font, inherit);
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.18s ease, color 0.18s ease;
+  flex-shrink: 0;
+}
+.ps-back-btn:hover {
+  background: rgba(99,102,241,0.18);
+  border-color: rgba(99,102,241,0.4);
+  color: #fff;
+}
+
+.ps-view-title {
+  font-size: 13px;
+  font-weight: 600;
+  color: rgba(255,255,255,0.85);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* Scrollable body for Room / About content */
+.ps-expanded-body {
+  max-height: 260px;
+  overflow-y: auto;
+  padding: 12px 14px;
+  scrollbar-width: thin;
+  scrollbar-color: rgba(99,102,241,0.35) transparent;
+}
+.ps-expanded-body::-webkit-scrollbar { width: 4px; }
+.ps-expanded-body::-webkit-scrollbar-thumb { background: rgba(99,102,241,0.35); border-radius: 2px; }
+
+/* Partner can scroll but not interact with nav controls */
+.ps-partner-lock .ps-back-btn { pointer-events: none; opacity: 0.4; }
+
+/* Sticky invite button shown at bottom for partners */
+.ps-sticky-invite {
+  padding: 8px 14px 10px;
+  border-top: 1px solid rgba(255,255,255,0.06);
+  display: flex;
+  justify-content: flex-end;
+}
+
+/* ── Room: posts grid ──────────────────────────────────── */
+
+.ps-posts-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 6px;
+}
+
+.ps-post-thumb {
+  border-radius: 8px;
+  overflow: hidden;
+  aspect-ratio: 1;
+  background: rgba(255,255,255,0.04);
+  border: 1px solid rgba(255,255,255,0.07);
+  position: relative;
+  cursor: default;
+}
+
+.ps-post-image img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.ps-post-caption {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  padding: 3px 5px;
+  background: linear-gradient(transparent, rgba(0,0,0,0.65));
+  font-size: 10px;
+  color: rgba(255,255,255,0.8);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.ps-post-text {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 8px;
+}
+.ps-post-text p {
+  font-size: 11px;
+  color: rgba(255,255,255,0.6);
+  line-height: 1.4;
+  word-break: break-word;
+  margin: 0;
+}
+
+.ps-posts-empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  padding: 28px 16px;
+  color: rgba(255,255,255,0.25);
+  font-size: 12px;
+}
+
+/* ── About: bio / tags / links ────────────────────────── */
+
+.ps-about-bio {
+  font-size: 13px;
+  color: rgba(255,255,255,0.72);
+  line-height: 1.6;
+  margin: 0 0 10px;
+  word-break: break-word;
+}
+
+.ps-about-interests {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-bottom: 10px;
+}
+
+.ps-about-tag {
+  display: inline-flex;
+  align-items: center;
+  padding: 3px 10px;
+  border-radius: 20px;
+  background: rgba(99,102,241,0.12);
+  border: 1px solid rgba(99,102,241,0.25);
+  font-size: 11px;
+  font-weight: 600;
+  color: rgba(99,102,241,0.9);
+}
+
+.ps-about-links {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.ps-about-link {
+  font-size: 12px;
+  color: #818cf8;
+  text-decoration: none;
+  word-break: break-all;
+}
+.ps-about-link:hover { text-decoration: underline; }
