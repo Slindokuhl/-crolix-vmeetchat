@@ -10,7 +10,7 @@ export const AGORA_APP_ID = "48e1240440fa48e29297863ed05ac95f";
 // points at the internal Capacitor WebView origin instead of a public URL.
 // Leave blank until the web app is deployed — link-building falls back to
 // window.location on web in that case.
-export const PUBLIC_WEB_URL = "";
+export const PUBLIC_WEB_URL = "https://crolix-5a614.web.app";
 
 export const FIREBASE_CONFIG = {
   apiKey:            "AIzaSyBYXtYwGH5U5ZNvEPZUcRenQ9bJheXmqAs",
