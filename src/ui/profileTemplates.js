@@ -155,6 +155,7 @@ export function buildProfileDashboard(user) {
                 <button class="phome-eye-btn" id="heroEmailToggle" title="Show/hide email">
                   <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
                 </button>
+                <button id="tourHelpBtn" title="Take the tour">?</button>
               </div>
               <div class="phome-meetid-pill">
                 <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="23 7 16 12 23 17 23 7"/><rect x="1" y="5" width="15" height="14" rx="2"/></svg>

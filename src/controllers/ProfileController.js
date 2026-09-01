@@ -7,6 +7,7 @@ import { FIREBASE_CONFIG, EMAILJS_PUBLIC_KEY, EMAILJS_SERVICE_ID, EMAILJS_TEMPLA
 import { buildProfileDashboard, buildEditProfileModal, buildEditBioModal, buildUserItem, buildPublicProfile, buildFriendProfilePage } from "../ui/profileTemplates.js";
 import { buildGroupInvitePreviewHtml } from "../ui/chatTemplates.js";
 import { crolixConfirm, crolixAlert } from "../utils/confirmModal.js";
+import { startSpotlightTour } from "../utils/tour.js";
 import { AuthController } from "./AuthController.js";
 import { RoomController } from "./RoomController.js";
 import { ChatController } from "./ChatController.js";
@@ -55,6 +56,29 @@ export class ProfileController {
     this._render();
     this._startPresence();
     this._listenIncomingCalls();
+    this._maybeStartTour();
+  }
+
+  _maybeStartTour() {
+    const key = `crolixTourSeen_${this._user.userId}`;
+    if (localStorage.getItem(key)) return;
+    localStorage.setItem(key, "1");
+    setTimeout(() => this._startTour(), 800);
+  }
+
+  _startTour() {
+    const screen = this.container.querySelector("#profile-screen");
+    if (!screen) return;
+    const scoped = (sel) => `#profile-screen ${sel}`;
+    startSpotlightTour([
+      { selector: scoped("#profileStartMeeting"), title: "Start meetings instantly", desc: "Get a unique Meeting ID and jump straight into a call — share it with anyone to invite them." },
+      { selector: scoped('.phome-feat-card[data-feat="chat"]'), title: "Message & group chat", desc: "Chat one-on-one, or create private group chats that only invited members can see." },
+      { selector: scoped('.phome-feat-card[data-feat="publicRoom"]'), title: "Share moments", desc: "Post photos, videos, or updates publicly for your friends to see." },
+      { selector: scoped('.phome-feat-card[data-feat="friends"]'), title: "Friends", desc: "Add friends, manage requests, and build your network." },
+      { selector: scoped('.phome-feat-card[data-feat="privateRoom"]'), title: "Private Vault", desc: "Your secret space — posts here stay hidden and only visible with your permission." },
+      { selector: scoped('.phome-feat-card[data-feat="find"]'), title: "Find people", desc: "Search anyone by their Meeting ID and call them directly." },
+      { selector: scoped('.phome-feat-card[data-feat="schedule"]'), title: "Schedule ahead", desc: "Plan a meeting for later and send invites straight to people's email." },
+    ]);
   }
 
   _startPresence() {
@@ -470,6 +494,10 @@ export class ProfileController {
     screen.querySelector("#profileStartMeeting").onclick = () => {
       this.onStartMeeting(this._user.meetingId, this._user.name);
     };
+
+    // Replay tour
+    const tourHelpBtn = screen.querySelector("#tourHelpBtn");
+    if (tourHelpBtn) tourHelpBtn.onclick = () => this._startTour();
 
     // Edit profile
     screen.querySelector("#profileEditBtn").onclick = () => navigateTo("profile");
