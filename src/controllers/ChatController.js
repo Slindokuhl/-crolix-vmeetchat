@@ -1057,12 +1057,26 @@ export class ChatController {
     }
   }
 
+  async _getHiddenLinkedGroupIds() {
+    try {
+      const snap = await this._db.collection("users").doc(this._user.userId)
+        .collection("categories").where("hidden", "==", true).get();
+      const ids = new Set();
+      snap.forEach(doc => { const linkedGroupId = doc.data().linkedGroupId; if (linkedGroupId) ids.add(linkedGroupId); });
+      return ids;
+    } catch (_) {
+      return new Set();
+    }
+  }
+
   async _loadGroups() {
     try {
+      const hiddenLinkedIds = await this._getHiddenLinkedGroupIds();
       const snap = await this._db.collection("groups")
         .where("members", "array-contains", this._user.userId).get();
       const groups = [];
       for (const doc of snap.docs) {
+        if (hiddenLinkedIds.has(doc.id)) continue;
         const data = { id: doc.id, ...doc.data() };
         let lastMessage = "", lastMessageAt = 0;
         try {
