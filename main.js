@@ -5,18 +5,6 @@
 import { VideoCall } from "./src/controllers/VideoCall.js";
 import { AuthController } from "./src/controllers/AuthController.js";
 import { ProfileController } from "./src/controllers/ProfileController.js";
-import { isNativeApp } from "./src/utils/platform.js";
-
-if (isNativeApp()) {
-  // target="_blank" anchors don't navigate anywhere inside a Capacitor WebView —
-  // route them to the system browser instead.
-  document.addEventListener("click", (e) => {
-    const link = e.target.closest('a[target="_blank"]');
-    if (!link || !/^https?:/.test(link.href)) return;
-    e.preventDefault();
-    window.Capacitor?.Plugins?.Browser?.open({ url: link.href });
-  });
-}
 
 window.addEventListener("DOMContentLoaded", () => {
   const app = document.getElementById("app");
