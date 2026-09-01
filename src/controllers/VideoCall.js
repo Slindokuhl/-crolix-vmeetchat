@@ -3,7 +3,7 @@
  * Main app controller — Agora RTC, Firebase presence, UI state.
  */
 
-import { AGORA_APP_ID, FIREBASE_CONFIG, EMAILJS_PUBLIC_KEY, EMAILJS_SERVICE_ID, EMAILJS_TEMPLATE_HOST, EMAILJS_TEMPLATE_GUEST, HOST_EMAIL } from "../config/config.js";
+import { AGORA_APP_ID, FIREBASE_CONFIG, EMAILJS_PUBLIC_KEY, EMAILJS_SERVICE_ID, EMAILJS_TEMPLATE_HOST, EMAILJS_TEMPLATE_GUEST, HOST_EMAIL, PUBLIC_WEB_URL } from "../config/config.js";
 import { ICONS } from "../ui/icons.js";
 import { buildJoinScreen, buildMeetingScreen, buildScheduleModal, buildSuccessToast, buildScreenZoomOverlay, buildNotifContainer } from "../ui/templates.js";
 import { gradientForName } from "../utils/avatar.js";
@@ -12,6 +12,7 @@ import { ScreenZoomController } from "../utils/screenZoom.js";
 import { GifReactions } from "../utils/gifReactions.js";
 import { SessionController } from "./SessionController.js";
 import { crolixAlert, crolixConfirm } from "../utils/confirmModal.js";
+import { isNativeApp } from "../utils/platform.js";
 
 const FREE_MEETING_CAP_MINUTES = 40;
 
@@ -346,6 +347,10 @@ export class VideoCall {
       // Clean URL without reloading
       window.history.replaceState({}, "", window.location.pathname);
     }
+    if (isNativeApp()) {
+      const shareBtn = this.container.querySelector("#shareScreenBtn");
+      if (shareBtn) shareBtn.style.display = "none";
+    }
   }
 
   _bindEvents() {
@@ -460,7 +465,7 @@ export class VideoCall {
     const btn = this.container.querySelector("#schedSubmit"); btn.disabled = true; btn.textContent = "Sending…";
     const formattedDate = new Date(`${date}T${time}`).toLocaleString("en-ZA", { weekday: "long", year: "numeric", month: "long", day: "numeric", hour: "2-digit", minute: "2-digit" });
 
-    const joinBase = (window.location.origin + window.location.pathname).replace(/\/[^/]*$/, "/");
+    const joinBase = PUBLIC_WEB_URL || (window.location.origin + window.location.pathname).replace(/\/[^/]*$/, "/");
     // Use %26 for & so the URL inside an HTML href attribute stays valid
     const joinLink = `${joinBase}?join=${encodeURIComponent(myMeetId)}`;
 

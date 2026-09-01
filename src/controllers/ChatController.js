@@ -3,7 +3,7 @@
  * Real-time 1-on-1 chat — messages, voice notes, stickers, files, typing, delete.
  */
 
-import { FIREBASE_CONFIG, GIPHY_API_KEY, LOCAL_GIFS } from "../config/config.js";
+import { FIREBASE_CONFIG, GIPHY_API_KEY, LOCAL_GIFS, PUBLIC_WEB_URL } from "../config/config.js";
 import { crolixConfirm, crolixAlert } from "../utils/confirmModal.js";
 import { buildChatPage, buildConvItem, buildChatHeader, buildMessageBubble, buildDateSeparator, buildDisappearMenu, buildGroupConvItem, buildCreateGroupModal, buildGroupHeader, buildGroupInfoPanel, buildChatMenu, buildConvContextMenu, buildInviteLinkModal } from "../ui/chatTemplates.js";
 import { ProfileShareController } from "./ProfileShareController.js";
@@ -1225,7 +1225,8 @@ export class ChatController {
 
   _renderInviteLinkModal(group) {
     this.container.querySelector("#inviteLinkOverlay")?.remove();
-    const link = `${window.location.origin}${window.location.pathname}?joinGroup=${group.inviteCode}`;
+    const base = PUBLIC_WEB_URL || `${window.location.origin}${window.location.pathname}`;
+    const link = `${base}?joinGroup=${group.inviteCode}`;
     const isAdmin = group.createdBy === this._user.userId;
     this.container.insertAdjacentHTML("beforeend", buildInviteLinkModal(link, isAdmin));
 
