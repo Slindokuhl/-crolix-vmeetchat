@@ -1,0 +1,39 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    match /users/{userId} {
+      allow read, write: if true;
+    }
+    match /users/{userId}/{sub=**} {
+      allow read, write: if true;
+    }
+    match /meetingIds/{meetId} {
+      allow read, write: if true;
+    }
+    match /otpCodes/{email} {
+      allow read, write: if true;
+    }
+    match /meetings/{meetingId} {
+      allow read, write: if true;
+    }
+    match /meetings/{meetingId}/{sub=**} {
+      allow read, write: if true;
+    }
+    match /chats/{chatId}/{sub=**} {
+      allow read, write: if true;
+    }
+    match /incomingCalls/{userId} {
+      allow read, write: if true;
+    }
+    match /groups/{groupId}/{sub=**} {
+      allow read, write: if true;
+    }
+
+    // Collection-group query (RecordingsController's collectionGroup("recordings")
+    // lookup) needs its own explicit rule — the meetings/{id}/{sub=**} wildcard above
+    // covers direct path reads/writes but not a raw collection-group query.
+    match /{path=**}/recordings/{recId} {
+      allow read, write: if true;
+    }
+  }
+}

@@ -1,0 +1,15 @@
+rules_version = '2';
+
+// This app has no Firebase Auth (its own session system lives in
+// Firestore/localStorage), so request.auth is always null here — same
+// trust model the rest of the app's Firestore data already runs on.
+// Kept open, with basic abuse guards on what can be uploaded.
+service firebase.storage {
+  match /b/{bucket}/o {
+    match /recordings/{channelId}/{fileName} {
+      allow read: if true;
+      allow write: if request.resource.size < 300 * 1024 * 1024
+                   && request.resource.contentType.matches('video/.*');
+    }
+  }
+}

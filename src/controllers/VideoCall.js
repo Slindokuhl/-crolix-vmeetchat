@@ -13,6 +13,7 @@ import { GifReactions } from "../utils/gifReactions.js";
 import { SessionController } from "./SessionController.js";
 import { crolixAlert, crolixConfirm } from "../utils/confirmModal.js";
 import { isNativeApp } from "../utils/platform.js";
+import { startRecording } from "../utils/recorder.js";
 
 const FREE_MEETING_CAP_MINUTES = 40;
 
@@ -38,6 +39,7 @@ export class VideoCall {
     this._meetChatGuestUnsub = null; this._meetChatTargetUid = null; this._meetChatTypingTimer = null;
     this._meetingStatusUnsub = null; this._meetingEndTimeout = null; this._hostTimerMins = 5;
     this._endedByFreeCap = false; this._freeCapWarningTimeout = null;
+    this._activeRecorder = null; this._recordingChannelId = null; this._recordingUid = null;
     this._initFirebase(); this._buildUI(); this._bindEvents(); this._loadEmailJS();
     this._logoAnimCleanup = initLogoAbsorption(this.container);
     this._screenZoom = new ScreenZoomController(this.container);
@@ -49,6 +51,7 @@ export class VideoCall {
     try {
       if (!firebase.apps.length) firebase.initializeApp(FIREBASE_CONFIG);
       this._db = firebase.firestore();
+      this._storage = firebase.storage();
       console.log("✅ Firebase ready");
     } catch (err) { console.error("Firebase init failed:", err); }
   }
@@ -374,6 +377,7 @@ export class VideoCall {
     this.container.querySelector("#count").onclick = () => this._toggleParticipantsPanel();
     this.container.querySelector("#closePanelBtn").onclick = () => { const p = this.container.querySelector("#participants-panel"); if (p) p.style.display = "none"; };
     this.container.querySelector("#meetChatBtn").onclick = () => this._toggleMeetChat();
+    this.container.querySelector("#recordBtn").onclick = () => this._toggleRecording();
     this.container.querySelector("#moodDrawerTab").onclick = () => this._sessionController.toggleDrawer();
     this.container.querySelector("#musicMuteBtn").onclick = () => this._toggleMusicMute();
     this.container.querySelector("#closeMeetChatBtn").onclick = () => this._closeMeetChat();
@@ -617,6 +621,76 @@ export class VideoCall {
     }
   }
 
+  // ── Local recording ─────────────────────────────────────────
+  async _toggleRecording() {
+    if (this._activeRecorder) { await this._stopRecording(); return; }
+
+    if (!this._userSession?.userId) {
+      crolixAlert("Sign in to record meetings — recordings need an account to save to.", { title: "Sign in required", icon: "info" });
+      return;
+    }
+    if (typeof window.MediaRecorder === "undefined") {
+      crolixAlert("Recording isn't supported in this browser.", { title: "Not supported", icon: "warning" });
+      return;
+    }
+    if (!this.localTracks[0] || !this.localTracks[1]) return;
+
+    try {
+      const stream = new MediaStream([
+        this.localTracks[1].getMediaStreamTrack(),
+        this.localTracks[0].getMediaStreamTrack(),
+      ]);
+      this._activeRecorder = startRecording(stream);
+      this._recordingChannelId = this._channelId;
+      this._recordingUid = this._localUid;
+      this._updateRecordButtonUI(true);
+    } catch (err) {
+      console.error("Start recording failed:", err);
+      crolixAlert("Couldn't start recording.", { title: "Error", icon: "error" });
+    }
+  }
+
+  async _stopRecording() {
+    if (!this._activeRecorder) return;
+    const recorder = this._activeRecorder;
+    const channelId = this._recordingChannelId, uid = this._recordingUid;
+    this._activeRecorder = null;
+    this._updateRecordButtonUI(false);
+    try {
+      const blob = await recorder.stop();
+      await this._uploadRecording(blob, channelId, uid);
+    } catch (err) {
+      console.error("Finalize recording failed:", err);
+    }
+  }
+
+  _updateRecordButtonUI(active) {
+    const btn = this.container.querySelector("#recordBtn");
+    const label = this.container.querySelector("#record-label");
+    if (btn) btn.classList.toggle("recording", active);
+    if (label) label.textContent = active ? "Stop" : "Record";
+  }
+
+  async _uploadRecording(blob, channelId, uid) {
+    if (!blob || !blob.size || !channelId) return;
+    try {
+      const name = this._userSession?.name || this._localName || "Recording";
+      const path = `recordings/${channelId}/${uid}_${Date.now()}.webm`;
+      const ref = this._storage.ref(path);
+      await ref.put(blob, { contentType: "video/webm" });
+      const downloadURL = await ref.getDownloadURL();
+      await this._db.collection("meetings").doc(channelId).collection("recordings").add({
+        recordedByUserId: this._userSession?.userId || null,
+        name,
+        storagePath: path,
+        downloadURL,
+        createdAt: Date.now(),
+      });
+    } catch (err) {
+      console.error("Upload recording failed:", err);
+    }
+  }
+
   leaveChannel() {
     if (!this.joined && !this.joining) return;
     if (this._screenZoom?._open) this._screenZoom.close();
@@ -625,6 +699,9 @@ export class VideoCall {
     const snapshotChannel = this._channelId, snapshotUid = this._localUid;
     const screenTrack = this.screenTrack, localTracks = this.localTracks.slice();
     const client = this.client, unsubscribe = this._unsubscribe;
+    const activeRecorder = this._activeRecorder;
+    const recordingChannelId = this._recordingChannelId, recordingUid = this._recordingUid;
+    this._activeRecorder = null;
     this.joined = false; this.joining = false; this.audioMuted = true; this.videoMuted = true; this.screenSharing = false;
     this._endedByFreeCap = false;
     this._sessionController.destroy();
@@ -651,6 +728,7 @@ export class VideoCall {
     if (muteVideo)  { muteVideo.classList.add("video-off"); muteVideo.innerHTML  = `<span class="btn-icon">${ICONS.camOff}</span><span class="btn-label">Start Video</span>`; }
     if (shareBtnEl) shareBtnEl.classList.remove("sharing");
     if (shareLabel) shareLabel.innerText = "Share";
+    this._updateRecordButtonUI(false);
     if (this._logoAnimCleanup) this._logoAnimCleanup();
     this._logoAnimCleanup = initLogoAbsorption(this.container);
     this._prewarmDone = false; this._prewarmedTracks = null; this._prewarmPending = false;
@@ -659,6 +737,12 @@ export class VideoCall {
     this.container.querySelector("#channelName").addEventListener("focus", prewarm, { once: true });
     try { this.client = AgoraRTC.createClient({ mode: "rtc", codec: "vp8" }); } catch (_) {}
     (async () => {
+      if (activeRecorder) {
+        try {
+          const blob = await activeRecorder.stop();
+          this._uploadRecording(blob, recordingChannelId, recordingUid);
+        } catch (err) { console.error("Recording stop on leave failed:", err); }
+      }
       localTracks.forEach(t => { try { t.stop(); t.close(); } catch (_) {} });
       if (screenTrack) { try { screenTrack.stop(); screenTrack.close(); } catch (_) {} }
       if (pendingPresence) { try { await pendingPresence; } catch (_) {} }

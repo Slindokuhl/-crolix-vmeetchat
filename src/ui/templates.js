@@ -132,6 +132,7 @@ export function buildMeetingScreen() {
     <button id="muteVideo" class="control-btn video-off" title="Start Video"><span class="btn-icon">${ICONS.camOff}</span><span class="btn-label">Start Video</span></button>
     <button id="shareScreenBtn" class="control-btn share-btn" title="Share Screen"><span class="btn-icon">${ICONS.screen}</span><span class="btn-label" id="share-label">Share</span></button>
     <button id="meetChatBtn" class="control-btn share-btn" title="Chat"><span class="btn-icon">${ICONS.chat}</span><span class="btn-label">Chat</span></button>
+    <button id="recordBtn" class="control-btn record-btn" title="Record"><span class="btn-icon">${ICONS.recordDot}</span><span class="btn-label" id="record-label">Record</span></button>
     <button id="leaveBtn" class="control-btn leave" title="Leave"><span class="btn-icon">${ICONS.leave}</span><span class="btn-label">Leave</span></button>
   </div>
 

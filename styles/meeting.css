@@ -38,6 +38,10 @@
 .share-btn{background:var(--blue-bg);color:var(--blue-text);}
 .share-btn:hover:not(:disabled){background:var(--blue-bg-hover);}
 .share-btn.sharing{background:#1e40af;color:#93c5fd;}
+.record-btn{background:var(--bg-card);color:var(--text-soft);}
+.record-btn.recording{background:var(--red-bg);color:#fca5a5;animation:recordPulse 1.4s ease-in-out infinite;}
+.record-btn.recording:hover:not(:disabled){background:var(--red-bg-hover);}
+@keyframes recordPulse{0%,100%{box-shadow:0 0 0 0 rgba(239,68,68,0.5);}50%{box-shadow:0 0 0 8px rgba(239,68,68,0);}}
 
 /* ══════════════════════════════════════════════
    HOST LEAVE MODAL

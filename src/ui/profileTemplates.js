@@ -84,6 +84,10 @@ export function buildProfileDashboard(user) {
         <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
         <span>Find</span>
       </button>
+      <button class="pnav-btn" data-page="recordings" title="Recordings">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="23 7 16 12 23 17 23 7"/><rect x="1" y="5" width="15" height="14" rx="2" ry="2"/></svg>
+        <span>Recordings</span>
+      </button>
     </div>
 
     <div class="pnav-bottom">
@@ -128,6 +132,9 @@ export function buildProfileDashboard(user) {
     </button>
     <button class="pmobile-btn" data-page="find">
       <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+    </button>
+    <button class="pmobile-btn" data-page="recordings">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="23 7 16 12 23 17 23 7"/><rect x="1" y="5" width="15" height="14" rx="2" ry="2"/></svg>
     </button>
   </nav>
 
@@ -395,6 +402,11 @@ export function buildProfileDashboard(user) {
           <div id="findResults"></div>
         </div>
       </div>
+    </div>
+
+    <!-- RECORDINGS PAGE -->
+    <div class="ppage" id="page-recordings">
+      <div class="ppage-inner"></div>
     </div>
 
   </main>
