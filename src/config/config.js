@@ -27,6 +27,13 @@ export const EMAILJS_TEMPLATE_HOST  = "template_myxj97v";
 export const EMAILJS_TEMPLATE_GUEST = "template_8056d44";
 export const HOST_EMAIL             = "slindokuhleatlehang22009757@gmail.com";
 
+// Usage & Costs dashboard (Profile page, HOST_EMAIL only) — rough cost
+// estimates only. Adjust these to match your actual Agora plan/region and
+// Firebase Storage class; they're not pulled from a real billing API.
+export const PREMIUM_PRICE_USD = 9.99;
+export const AGORA_RATE_PER_1000_MIN_USD = 3.99;   // Agora's published HD-video rate, adjust to your plan
+export const FIREBASE_STORAGE_RATE_PER_GB_MONTH_USD = 0.026; // Standard Firebase Storage rate
+
 // Giphy — GIF reactions
 export const GIPHY_API_KEY = "dc6zaTOxFJmzC";
 

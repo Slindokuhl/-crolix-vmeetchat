@@ -685,10 +685,28 @@ export class VideoCall {
         name,
         storagePath: path,
         downloadURL,
+        sizeBytes: blob.size,
         createdAt: Date.now(),
       });
     } catch (err) {
       console.error("Upload recording failed:", err);
+    }
+  }
+
+  // ── Usage logging (feeds the Usage & Costs dashboard) ───────
+  async _logUsage({ durationSeconds, isHost, channelId, session }) {
+    if (!session?.userId || !channelId || !durationSeconds || durationSeconds < 5) return;
+    try {
+      await this._db.collection("usageLog").add({
+        userId: session.userId,
+        userName: session.name || "Unknown",
+        channelId,
+        isHost,
+        durationSeconds,
+        endedAt: Date.now(),
+      });
+    } catch (err) {
+      console.error("Usage log failed:", err);
     }
   }
 
@@ -703,6 +721,7 @@ export class VideoCall {
     const activeRecorder = this._activeRecorder;
     const recordingChannelId = this._recordingChannelId, recordingUid = this._recordingUid;
     this._activeRecorder = null;
+    const usageSnapshot = { durationSeconds: this.secondsElapsed, isHost: this._isHost(), channelId: this._channelId, session: this._userSession };
     this.joined = false; this.joining = false; this.audioMuted = true; this.videoMuted = true; this.screenSharing = false;
     this._endedByFreeCap = false;
     this._sessionController.destroy();
@@ -744,6 +763,7 @@ export class VideoCall {
           this._uploadRecording(blob, recordingChannelId, recordingUid);
         } catch (err) { console.error("Recording stop on leave failed:", err); }
       }
+      this._logUsage(usageSnapshot);
       localTracks.forEach(t => { try { t.stop(); t.close(); } catch (_) {} });
       if (screenTrack) { try { screenTrack.stop(); screenTrack.close(); } catch (_) {} }
       if (pendingPresence) { try { await pendingPresence; } catch (_) {} }

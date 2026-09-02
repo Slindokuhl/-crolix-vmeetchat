@@ -40,6 +40,9 @@ service cloud.firestore {
     match /groups/{groupId}/{sub=**} {
       allow read, write: if true;
     }
+    match /usageLog/{entryId} {
+      allow read, write: if true;
+    }
 
     // Collection-group query (RecordingsController's collectionGroup("recordings")
     // lookup) needs its own explicit rule — the meetings/{id}/{sub=**} wildcard above

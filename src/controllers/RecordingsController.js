@@ -144,6 +144,7 @@ export class RecordingsController {
       name: "Merged recording",
       storagePath: path,
       downloadURL,
+      sizeBytes: blob.size,
       merged: true,
       createdAt: Date.now(),
     });

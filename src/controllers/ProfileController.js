@@ -14,6 +14,7 @@ import { RoomController } from "./RoomController.js";
 import { ChatController } from "./ChatController.js";
 import { CategoryController } from "./CategoryController.js";
 import { RecordingsController } from "./RecordingsController.js";
+import { UsageController } from "./UsageController.js";
 import { ICONS } from "../ui/icons.js";
 import { EmojiPicker } from "../ui/emojiPicker.js";
 
@@ -39,6 +40,7 @@ export class ProfileController {
       (groupId) => this._openGroupDirect(groupId),
     );
     this._recordingsController = new RecordingsController(container);
+    this._usageController = new UsageController(container);
     this._init();
   }
 
@@ -307,6 +309,7 @@ export class ProfileController {
     this._chatController.setUser(this._user, this._fullUserData);
     this._categoryController.setUser(this._user, this._fullUserData);
     this._recordingsController.setUser(this._user);
+    this._usageController.setUser(this._user);
     this._loadFriends();
     this._loadPending();
     this._loadSentRequests();
@@ -359,6 +362,7 @@ export class ProfileController {
     if (page !== "chat") this._chatController.cleanup();
     if (page === "categories") this._categoryController.render();
     if (page === "recordings") this._recordingsController.render();
+    if (page === "usage") this._usageController.render();
   }
 
   _openChatWithFriend(userId) {

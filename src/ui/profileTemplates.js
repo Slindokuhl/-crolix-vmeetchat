@@ -4,6 +4,7 @@
  */
 
 import { ICONS } from "./icons.js";
+import { HOST_EMAIL } from "../config/config.js";
 
 function _renderBioText(text) {
   const escaped = text.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
@@ -17,6 +18,7 @@ export function buildProfileDashboard(user) {
   const picHtml = user.profilePicBase64
     ? `<img src="${user.profilePicBase64}" alt="${user.name}" />`
     : `<div class="pic-fallback">${(user.name || "?").charAt(0).toUpperCase()}</div>`;
+  const isOwner = user.email === HOST_EMAIL;
 
   return `
 <div id="profile-screen" class="profile-screen">
@@ -88,6 +90,11 @@ export function buildProfileDashboard(user) {
         <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="23 7 16 12 23 17 23 7"/><rect x="1" y="5" width="15" height="14" rx="2" ry="2"/></svg>
         <span>Recordings</span>
       </button>
+      ${isOwner ? `
+      <button class="pnav-btn" data-page="usage" title="Usage & Costs">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="20" x2="12" y2="10"/><line x1="18" y1="20" x2="18" y2="4"/><line x1="6" y1="20" x2="6" y2="16"/></svg>
+        <span>Usage &amp; Costs</span>
+      </button>` : ""}
     </div>
 
     <div class="pnav-bottom">
@@ -136,6 +143,10 @@ export function buildProfileDashboard(user) {
     <button class="pmobile-btn" data-page="recordings">
       <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="23 7 16 12 23 17 23 7"/><rect x="1" y="5" width="15" height="14" rx="2" ry="2"/></svg>
     </button>
+    ${isOwner ? `
+    <button class="pmobile-btn" data-page="usage">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="20" x2="12" y2="10"/><line x1="18" y1="20" x2="18" y2="4"/><line x1="6" y1="20" x2="6" y2="16"/></svg>
+    </button>` : ""}
   </nav>
 
   <!-- ── Main Content Area ── -->
@@ -406,6 +417,11 @@ export function buildProfileDashboard(user) {
 
     <!-- RECORDINGS PAGE -->
     <div class="ppage" id="page-recordings">
+      <div class="ppage-inner"></div>
+    </div>
+
+    <!-- USAGE & COSTS PAGE (owner-only) -->
+    <div class="ppage" id="page-usage">
       <div class="ppage-inner"></div>
     </div>
 
