@@ -8,6 +8,7 @@ import { buildProfileDashboard, buildEditProfileModal, buildEditBioModal, buildU
 import { buildGroupInvitePreviewHtml } from "../ui/chatTemplates.js";
 import { crolixConfirm, crolixAlert } from "../utils/confirmModal.js";
 import { startSpotlightTour } from "../utils/tour.js";
+import { startPremiumCheckout } from "../utils/billing.js";
 import { AuthController } from "./AuthController.js";
 import { RoomController } from "./RoomController.js";
 import { ChatController } from "./ChatController.js";
@@ -393,19 +394,15 @@ export class ProfileController {
 
   async _showUpgradeFlow() {
     const ok = await crolixConfirm(
-      "Upgrade to Premium ($9.99/mo) for unlimited meeting length — no more time caps. This is a demo upgrade (no real payment yet).",
-      { title: "Upgrade to Premium?", confirmText: "Upgrade", icon: "success" }
+      "Upgrade to Premium ($9.99/mo) for unlimited meeting length — no more time caps. You'll be taken to Stripe to pay securely.",
+      { title: "Upgrade to Premium?", confirmText: "Continue to payment", icon: "success" }
     );
     if (!ok) return;
     try {
-      await this._db.collection("users").doc(this._user.userId).update({ isPremium: true });
-      this._user.isPremium = true;
-      if (this._fullUserData) this._fullUserData.isPremium = true;
-      localStorage.setItem(SESSION_KEY, JSON.stringify(this._user));
-      this._showEditModal();
+      await startPremiumCheckout(this._user.userId, this._user.email);
     } catch (err) {
       console.error("Upgrade error:", err);
-      crolixAlert("Failed to upgrade. Please try again.", { title: "Error", icon: "error" });
+      crolixAlert("Failed to start checkout. Please try again.", { title: "Error", icon: "error" });
     }
   }
 

@@ -5,6 +5,7 @@
 import { VideoCall } from "./src/controllers/VideoCall.js";
 import { AuthController } from "./src/controllers/AuthController.js";
 import { ProfileController } from "./src/controllers/ProfileController.js";
+import { crolixAlert } from "./src/utils/confirmModal.js";
 
 window.addEventListener("DOMContentLoaded", () => {
   const app = document.getElementById("app");
@@ -31,6 +32,20 @@ window.addEventListener("DOMContentLoaded", () => {
     if (joinGroupCode) {
       window.history.replaceState({}, "", window.location.pathname);
       profileCtrl.handleGroupInviteFromUrl(joinGroupCode);
+    }
+
+    const upgrade = params.get("upgrade");
+    if (upgrade) {
+      window.history.replaceState({}, "", window.location.pathname);
+      if (upgrade === "success") {
+        await crolixAlert(
+          "Payment received! Your account will show Premium within a few seconds.",
+          { title: "Welcome to Premium", icon: "success" }
+        );
+        setTimeout(() => { const s = AuthController.getSession(); if (s) showProfile(s); }, 3000);
+      } else if (upgrade === "cancelled") {
+        crolixAlert("Checkout was cancelled — no payment was made.", { title: "Upgrade cancelled", icon: "info" });
+      }
     }
   }
 

@@ -14,6 +14,7 @@ import { SessionController } from "./SessionController.js";
 import { crolixAlert, crolixConfirm } from "../utils/confirmModal.js";
 import { isNativeApp } from "../utils/platform.js";
 import { startRecording } from "../utils/recorder.js";
+import { startPremiumCheckout } from "../utils/billing.js";
 
 const FREE_MEETING_CAP_MINUTES = 40;
 
@@ -977,17 +978,16 @@ export class VideoCall {
     if (!session?.userId || !this._db) return;
 
     const ok = await crolixConfirm(
-      "Upgrade to Premium ($9.99/mo) for unlimited meeting length — no more time caps. This is a demo upgrade (no real payment yet).",
-      { title: "Upgrade to Premium?", confirmText: "Upgrade", icon: "success" }
+      "Upgrade to Premium ($9.99/mo) for unlimited meeting length — no more time caps. You'll be taken to Stripe to pay securely.",
+      { title: "Upgrade to Premium?", confirmText: "Continue to payment", icon: "success" }
     );
     if (!ok) return;
 
     try {
-      await this._db.collection("users").doc(session.userId).update({ isPremium: true });
-      this._forceLeaveMeeting();
+      await startPremiumCheckout(session.userId, session.email);
     } catch (err) {
       console.error("Upgrade error:", err);
-      crolixAlert("Failed to upgrade. Please try again.", { title: "Error", icon: "error" });
+      crolixAlert("Failed to start checkout. Please try again.", { title: "Error", icon: "error" });
     }
   }
 

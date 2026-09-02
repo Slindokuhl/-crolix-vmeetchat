@@ -2,9 +2,21 @@ rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
     match /users/{userId} {
-      allow read, write: if true;
+      // isPremium/stripe* are only ever set by the stripeWebhook Cloud
+      // Function via the Admin SDK, which bypasses these rules entirely.
+      // Blocking client writes to just these fields prevents anyone from
+      // granting themselves Premium for free via devtools.
+      allow read, delete: if true;
+      allow create: if !('isPremium' in request.resource.data) || request.resource.data.isPremium == false;
+      allow update: if !request.resource.data.diff(resource.data).affectedKeys()
+                        .hasAny(['isPremium', 'stripeCustomerId', 'stripeSubscriptionId']);
     }
-    match /users/{userId}/{sub=**} {
+    // {sub=**} matches zero-or-more segments, so it would also match
+    // /users/{userId} itself and re-open the isPremium restriction above
+    // (rules are OR'd across matching blocks). Requiring one concrete
+    // segment before the recursive wildcard limits this to actual
+    // subcollections (e.g. users/{userId}/categories/{catId}).
+    match /users/{userId}/{collection}/{sub=**} {
       allow read, write: if true;
     }
     match /meetingIds/{meetId} {
